@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>伴学搭子</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- 顶栏 -->
+    <header class="topbar">
+      <h1 class="logo">伴学搭子</h1>
+      <div class="topbar-right">
+        <div class="pill-group" role="group">
+          <button type="button" data-music="focus" class="pill">专注</button>
+          <button type="button" data-music="calm" class="pill">舒缓</button>
+          <button type="button" data-music="energy" class="pill">激励</button>
+        </div>
+        <button type="button" class="icon-btn" id="musicToggle" title="白噪音">&#9835;</button>
+        <input type="range" id="musicVolume" min="0" max="100" value="40" class="vol" />
+        <button type="button" class="icon-btn" id="nightToggle" title="夜间模式">&#9789;</button>
+      </div>
+    </header>
+
+    <!-- 聚焦横幅 -->
+    <div class="focus-banner is-hidden" id="focusBanner">
+      <span class="focus-dot"></span>
+      <span class="focus-name" id="focusTaskName">—</span>
+      <span class="focus-timer" id="focusTimer">25:00</span>
+      <button type="button" class="btn sm outline" id="focusPause">暂停</button>
+      <button type="button" class="btn sm ghost" id="focusStop">结束</button>
+    </div>
+
+    <!-- 主体 -->
+    <div class="layout">
+
+      <!-- 左列 -->
+      <aside class="sidebar">
+        <div class="card avatar-card" id="companion" role="button" tabindex="0" aria-label="点击角色互动">
+          <img id="avatarImg" class="avatar-img" alt="伴学角色" />
+          <div class="avatar-info">
+            <select id="relationship" class="select">
+              <option value="brother">兄弟</option>
+              <option value="bestie">闺蜜</option>
+              <option value="partner">情侣</option>
+              <option value="senior">学长</option>
+            </select>
+            <div class="pill-group sm">
+              <button type="button" data-avatar="2d" class="pill xs">2D</button>
+              <button type="button" data-avatar="3d" class="pill xs">3D</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card chat-card">
+          <div class="chat-log" id="chatLog" aria-live="polite"></div>
+          <form class="chat-bar" id="chatForm" autocomplete="off">
+            <input type="text" id="chatInput" class="chat-input" placeholder="说点什么…" />
+            <button type="submit" class="chat-send">&#8593;</button>
+          </form>
+        </div>
+
+        <div class="card stats-card">
+          <p class="stats-today" id="todayReport"></p>
+          <div class="stats-divider"></div>
+          <div class="stats-hist-head">
+            <span class="stats-label">学习趋势</span>
+            <select id="historyRange" class="select xs">
+              <option value="7">7 天</option>
+              <option value="14">14 天</option>
+              <option value="30">30 天</option>
+            </select>
+          </div>
+          <div id="historyChart"></div>
+          <p class="hist-summary" id="historySummary"></p>
+        </div>
+      </aside>
+
+      <!-- 右列 -->
+      <main class="main">
+        <section class="card card-hover">
+          <h2 class="section-title">任务</h2>
+          <form id="taskForm">
+            <div class="task-input-row">
+              <input name="name" type="text" required placeholder="添加新任务…" class="input lg grow" />
+              <button type="submit" class="btn primary">添加</button>
+            </div>
+            <div class="task-options">
+              <div class="opt-row"><span class="opt-label">类型</span>
+                <div class="pill-group" data-field="task_type">
+                  <button type="button" class="pill" data-val="homework">作业</button>
+                  <button type="button" class="pill" data-val="review">复习</button>
+                  <button type="button" class="pill" data-val="hobby">兴趣</button>
+                  <button type="button" class="pill" data-val="other">其他</button>
+                </div>
+              </div>
+              <div class="opt-row"><span class="opt-label">紧急</span>
+                <div class="pill-group" data-field="urgency">
+                  <button type="button" class="pill" data-val="high">高</button>
+                  <button type="button" class="pill active" data-val="medium">中</button>
+                  <button type="button" class="pill" data-val="low">低</button>
+                </div>
+              </div>
+              <div class="opt-row"><span class="opt-label">难度</span>
+                <div class="pill-group" data-field="difficulty">
+                  <button type="button" class="pill" data-val="easy">易</button>
+                  <button type="button" class="pill active" data-val="medium">中</button>
+                  <button type="button" class="pill" data-val="hard">难</button>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" name="task_type" value="homework" />
+            <input type="hidden" name="urgency" value="medium" />
+            <input type="hidden" name="difficulty" value="medium" />
+          </form>
+          <ul class="task-list" id="taskList"></ul>
+        </section>
+
+        <div class="two-col">
+          <section class="card card-hover pomo-card">
+            <h2 class="section-title">番茄钟</h2>
+            <div class="pomo-ring" id="pomoRing">
+              <span class="pomo-time" id="pomoDisplay">25:00</span>
+              <span class="pomo-phase" id="pomoPhase">准备就绪</span>
+            </div>
+            <div class="pomo-btns">
+              <button type="button" class="btn primary" id="pomoStart">开始专注</button>
+              <button type="button" class="btn outline" id="pomoReset">重置</button>
+            </div>
+            <div class="pomo-cfg">
+              <label>专注 <input type="number" id="pomoWorkMin" min="1" max="120" class="input num" /> 分</label>
+              <label>休息 <input type="number" id="pomoBreakMin" min="1" max="60" class="input num" /> 分</label>
+            </div>
+            <p class="hint">每完成 3 个番茄解锁彩蛋</p>
+          </section>
+
+          <section class="card card-hover">
+            <h2 class="section-title">备忘录</h2>
+            <form class="memo-form" id="memoForm">
+              <input name="title" type="text" placeholder="标题（可选）" class="input" />
+              <textarea name="body" rows="2" placeholder="记点什么…" class="input"></textarea>
+              <div class="memo-foot">
+                <label class="check"><input type="checkbox" name="important" /> 重要</label>
+                <button type="submit" class="btn primary sm">保存</button>
+              </div>
+            </form>
+            <ul class="memo-list" id="memoList"></ul>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
